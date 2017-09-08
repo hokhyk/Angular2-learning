@@ -329,6 +329,153 @@ for="productNameInput">Product Name</label> type="text"
 id="productNameInput"
 placeholder="Product Name"
  [formControl]="myForm.get('productName')" 
- [(ngModel)]="productName"> 
- 
- 
+ [(ngModel)]="productName">
+
+# Dependeny Injection DI
+## Within Angular’s DI system,
+ instead of directly importing and creating a new instance of a class,
+instead we will:
+1. Create the dependency (e.g. the service class)
+2. Configure the injection (i.e. register the injection with Angular in our NgModule)
+3. Declare the dependencies on the receiving component
+
+The first thing we do is create the service class, that is, the class that exposes some behavior we want
+to use. This will be called the injectable because it is the thing that our components will receive via
+the injection.
+Reminder on terminology: a provider provides (creates, instantiates, etc.) the injectable (the thing
+you want). In Angular when you want to access aninjectable youinject a dependency into a function
+(often a constructor) and Angular’s dependency injection framework will locate it and provide it
+to you.
+
+
+## Provider Injector and Dependency
+Dependency injection in Angular has three pieces:
+• the Provider (also often referred to as a binding) maps a token (that can be a string or a class)
+to a list of dependencies. It tells Angular how to create an object, given a token.
+• the Injector that holds a set of bindings and is responsible for resolving dependencies and
+injecting them when creating objects
+• the Dependency that is what’s being injected
+
+##defining the services or service providers.
+1 import { Injectable } from '@angular/core';
+2 @Injectable()
+3 export class UserService {
+4 }
+
+## Providing Dependencies with NgModule
+what we’d normally do is
+• use NgModule to register what we’ll inject – these are called providers and
+• use decorators (generally on a constructor) to specify what we’re injecting
+
+### injecting a class
+1 providers: [ UserService ]
+This tells Angular that we want to provide a singleton instance of UserService whenever UserService is injected. Because this pattern is so common, the class by itself is actually shorthand notation
+for the following, equivalent configuration:
+@NgModule ...
+
+1 providers: [
+2 { provide: UserService, useClass: UserService }
+3 ]
+
+@Component ...
+16  constructor(private userService: UserService) {
+17 // empty because we don't have to do anything else!
+18 }
+Here we’re mapping the UserService class to the UserService token.
+As we’ve seen above, in this case the injector will create a singleton behind the scenes and return
+the same instance every time we inject it .
+
+### injecting a value
+Another way we can use DI is to provide a value, much like we might use a global constant. For
+instance, we might configure an API Endpoint URL depending on the environment.
+1 providers: [
+2 { provide: 'API_URL', useValue: 'http://my.api.com/v1' }
+3 ]
+
+1 import { Inject } from '@angular/core';
+2 3
+export class AnalyticsDemoComponent {
+4 constructor(@Inject('API_URL') apiUrl: string) {
+5 // works! do something w/ apiUrl
+6 }
+7 }
+
+### Using a factory   Configurable Services
+9
+@NgModule({
+10 imports: [
+11 CommonModule
+12 ],
+13 providers: [
+14 {
+15 // `AnalyticsService` is the _token_ we use to inject
+16 // note, the token is the class, but it's just used as an identifier!
+17 provide: AnalyticsService,
+19 // useFactory is a function - whatever is returned from this function
+20 // will be injected
+21 useFactory() {
+22
+23 // create an implementation that will log the event
+24 const loggingImplementation: AnalyticsImplementation = {
+25 recordEvent: (metric: Metric): void => {
+26 console.log('The metric is:', metric);
+27 }
+28 };
+29
+30 // create our new `AnalyticsService` with the implementation
+31 return new AnalyticsService(loggingImplementation);
+32 }
+33 }
+34 ],
+35 declarations: [ ]
+36 })
+37 export class AnalyticsDemoModule { }
+
+Here in providers we’re using the syntax:
+1 providers: [
+2 { provide: AnalyticsService, useFactory: () => ... }
+3 ]
+useFactory takes a function and whatever this function returns will be injected.
+In useFactory we’re creating an AnalyticsImplementation object that has one function: recordEvent. recordEvent is where we could, in theory, configure what happens when an event is recorded.
+Again, in a real app this would probably send an event to Google Analytics or a custom event logging
+software.
+
+### Factory Dependencies
+Using a factory is the most powerful way to create injectables, because we can do whatever we want
+within the factory function. Sometimes our factory function will have dependencies of it’s own。
+@NgModule({
+  imports: [
+    CommonModule,
+    HttpModule, // <-- added
+  ],
+  providers: [
+    // add our API_URL provider
+    { provide: 'API_URL', useValue: 'http://devserver.com' },
+    {
+      provide: AnalyticsService,
+
+      // add our `deps` to specify the factory depencies
+      deps: [ Http, 'API_URL' ],
+
+      // notice we've added arguments here
+      // the order matches the deps order
+      useFactory(http: Http, apiUrl: string) {
+
+        // create an implementation that will log the event
+        const loggingImplementation: AnalyticsImplementation = {
+          recordEvent: (metric: Metric): void => {
+            console.log('The metric is:', metric);
+            console.log('Sending to: ', apiUrl);
+            // ... You'd send the metric using http here ...
+          }
+        };
+
+        // create our new `AnalyticsService` with the implementation
+        return new AnalyticsService(loggingImplementation);
+      }
+    },
+  ],
+  declarations: [ ]
+})
+
+# Dependency Injection in Apps
