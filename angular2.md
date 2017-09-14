@@ -16,11 +16,12 @@ tsc filename.ts
 #macOS:
 1. brew install node
 2. npm install -g cnpm --registry=https://registry.npm.taobao.org
-3. cnpm i -g npm  //升级npm
-4. cnpm install -g typescript
-5. cnpm install -g --save-dev @angular/cli@latest
-6.  brew install watchman
-7.  brew install tree
+3. sudo ln -s /usr/local/bin/cnpm /usr/bin/cnpm
+4. cnpm i -g npm  //升级npm
+5. cnpm install -g typescript
+6. cnpm install -g --save-dev @angular/cli@latest
+7.  brew install watchman
+8.  brew install tree
 
 
 # ng  app 
@@ -339,15 +340,6 @@ instead we will:
 2. Configure the injection (i.e. register the injection with Angular in our NgModule)
 3. Declare the dependencies on the receiving component
 
-The first thing we do is create the service class, that is, the class that exposes some behavior we want
-to use. This will be called the injectable because it is the thing that our components will receive via
-the injection.
-Reminder on terminology: a provider provides (creates, instantiates, etc.) the injectable (the thing
-you want). In Angular when you want to access aninjectable youinject a dependency into a function
-(often a constructor) and Angular’s dependency injection framework will locate it and provide it
-to you.
-
-
 ## Provider Injector and Dependency
 Dependency injection in Angular has three pieces:
 • the Provider (also often referred to as a binding) maps a token (that can be a string or a class)
@@ -479,3 +471,297 @@ within the factory function. Sometimes our factory function will have dependenci
 })
 
 # Dependency Injection in Apps
+
+
+
+#http
+##  http related DI
+import { HttpModule } from '@angular/http';
+
+import {
+  Injectable,
+  Inject
+} from '@angular/core';
+import { Http, Response } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+import { SearchResult } from './search-result.model';
+export const YOUTUBE_API_KEY = 'AIzaSyDOfT_BO81aEZScosfTYMruJobmpjqNeEk';
+export const YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3/search';
+
+/**
+ * YouTubeService connects to the YouTube API
+ * See: * https://developers.google.com/youtube/v3/docs/search/list
+ */
+@Injectable()
+export class YouTubeSearchService {
+  constructor(private http: Http,
+    @Inject(YOUTUBE_API_KEY) private apiKey: string,
+    @Inject(YOUTUBE_API_URL) private apiUrl: string) {
+    }
+
+    search(query: string): Observable<SearchResult[]> {
+      const params: string = [
+        `q=${query}`,
+        `key=${this.apiKey}`,
+        `part=snippet`,
+        `type=video`,
+        `maxResults=10`
+      ].join('&');
+      const queryUrl = `${this.apiUrl}?${params}`;
+      return this.http.get(queryUrl)
+      .map((response: Response) => {
+        return (<any>response.json()).items.map(item => {
+          // console.log("raw item", item); // uncomment if you want to debug
+          return new SearchResult({
+            id: item.id.videoId,
+            title: item.snippet.title,
+            description: item.snippet.description,
+            thumbnailUrl: item.snippet.thumbnails.high.url
+          });
+        });
+      });
+    }
+  }
+
+## (<any>response.json()).items.
+We’re telling TypeScript that we’re not interested in doing strict type checking.
+When working with a JSON API, we don’t generally have typing definitions for the API
+responses, and so TypeScript won’t know that the Object returned even has an items key,
+so the compiler will complain.
+We could call response.json()["items"] and then cast that to an Array etc., but in this
+case (and in creating the SearchResult, it’s just cleaner to use an any type, at the expense
+of strict type checking.
+
+## http related event,  rxjs,
+import {
+  Component,
+  OnInit,
+  Output,
+  EventEmitter,
+  ElementRef
+} from '@angular/core';
+
+// By importing just the rxjs operators we need, We're theoretically able
+// to reduce our build size vs. importing all of them.
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/fromEvent';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/debounceTime';
+import 'rxjs/add/operator/do';
+import 'rxjs/add/operator/switch';
+
+import { YouTubeSearchService } from './you-tube-search.service';
+import { SearchResult } from './search-result.model';
+
+@Component({
+  selector: 'app-search-box',
+  template: `
+    <input type="text" class="form-control" placeholder="Search" autofocus>
+  `
+})
+export class SearchBoxComponent implements OnInit {
+  @Output() loading: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() results: EventEmitter<SearchResult[]> = new EventEmitter<SearchResult[]>();
+
+  constructor(private youtube: YouTubeSearchService,
+              private el: ElementRef) {
+  }
+
+  ngOnInit(): void {
+    // convert the `keyup` event into an observable stream
+    Observable.fromEvent(this.el.nativeElement, 'keyup')
+      .map((e: any) => e.target.value) // extract the value of the input
+      .filter((text: string) => text.length > 1) // filter out if empty
+      .debounceTime(250)                         // only once every 250ms
+      .do(() => this.loading.next(true))         // enable loading
+      // search, discarding old events if new input comes in
+      .map((query: string) => this.youtube.search(query))
+      .switch()
+      // act on the return of the search
+      .subscribe(
+        (results: SearchResult[]) => { // on sucesss
+          this.loading.next(false);
+          this.results.next(results);
+        },
+        (err: any) => { // on error
+          console.log(err);
+          this.loading.next(false);
+        },
+        () => { // on completion
+          this.loading.next(false);
+        }
+      );
+  }
+}
+### @Output() loading:
+The two @Outputs specify that events will be emitted from this component. That is, we can use the
+(output)="callback()" syntax in our view to listen to events on this component.
+1 <app-search-box
+2 (loading)="loading = $event"
+3 (results)="updateResults($event)"
+4 ></app-search-box>
+
+### OnInit    ngOnInit（)
+his class implements OnInit because we want to use the ngOnInit lifecycle callback. If
+a class implements OnInit then the ngOnInit function will be called after the first change detection
+check.
+ngOnInit is a good place to do initialization (vs. the constructor) because inputs set on a component
+are not available in the constructor.
+Here we create the EventEmitters for both loading and the results. loading will emit a boolean
+when this search is loading and results will emit an array of SearchResults when the search is
+finished.
+
+### the element el ElementRef
+2. The element el that this component is attached to. el is an object of type ElementRef, which
+   is an Angular wrapper around a native element.
+
+#### Angular 4 ElementRef
+[https://segmentfault.com/a/1190000008653690]
+Angular 的口号是 - "一套框架，多种平台。同时适用手机与桌面 (One framework.Mobile & desktop.)"，即 Angular 是支持开发跨平台的应用，比如：Web 应用、移动 Web 应用、原生移动应用和原生桌面应用等。
+
+为了能够支持跨平台，Angular 通过抽象层封装了不同平台的差异，统一了 API 接口。如定义了抽象类 Renderer 、抽象类 RootRenderer 等。此外还定义了以下引用类型：ElementRef、TemplateRef、ViewRef 、ComponentRef 和 ViewContainerRef 等。下面我们就来分析一下 ElementRef 类：
+
+ElementRef的作用
+在应用层直接操作 DOM，就会造成应用层与渲染层之间强耦合，导致我们的应用无法运行在不同环境，如 web worker 中，因为在 web worker 环境中，是不能直接操作 DOM。有兴趣的读者，可以阅读一下 Web Workers 中支持的类和方法 这篇文章。通过 ElementRef 我们就可以封装不同平台下视图层中的 native 元素 (在浏览器环境中，native 元素通常是指 DOM 元素)，最后借助于 Angular 提供的强大的依赖注入特性，我们就可以轻松地访问到 native 元素。
+
+ElementRef的定义
+export class ElementRef {
+  public nativeElement: any;
+  constructor(nativeElement: any) { this.nativeElement = nativeElement; }
+}
+ElementRef的应用
+我们先来介绍一下整体需求，我们想在页面成功渲染后，获取页面中的 div 元素，并改变该 div 元素的背景颜色。接下来我们来一步步，实现这个需求。
+
+### events, observable RxJS
+   turn the keyup events into an observable stream.
+
+####  rxjs  Rx.Observable.fromEvent
+RxJS provides a way to listen to events on an element using Rx.Observable.fromEvent.
+// convert the `keyup` event into an observable stream
+  Observable.fromEvent(this.el.nativeElement, 'keyup')
+Notice that in fromEvent:
+• the first argument is this.el.nativeElement (the native DOM element this component is
+attached to)
+• the second argument is the string 'keyup', which is the name of the event we want to turn
+into a stream
+
+#### chain functions on to steam.
+We can now perform some RxJS magic over this stream to turn it into SearchResults. Let’s walk
+through step by step.
+Given the stream of keyup events we can chain on more methods. In the next few paragraphs we’re
+going to chain several functions on to our stream which will transform the stream. Then at the end
+we’ll show the whole example together.
+First, let’s extract the value of the input tag:
+1 .map((e: any) => e.target.value) // extract the value of the input
+Above says, map over each keyup event, then find the event target (e.target, that is, our input
+element) and extract the value of that element. This means our stream is now a stream of strings.
+Next:
+HTTP 203
+1 .filter((text: string) => text.length > 1)
+This filter means the stream will not emit any search strings for which the length is less than one.
+You could set this to a higher number if you want to ignore short searches.
+1 .debounceTime(250)
+debounceTime means we will throttle requests that come in faster than 250ms. That is, we won’t
+search on every keystroke, but rather after the user has paused a small amount.
+1 .do(() => this.loading.next(true)) // enable loading
+Using do on a stream is a way to perform a function mid-stream for each event, but it does not
+change anything in the stream. The idea here is that we’ve got our search, it has enough characters,
+and we’ve debounced, so now we’re about to search, so we turn on loading.
+this.loading is an EventEmitter. We “turn on” loading by emitting true as the next event. We emit
+something on an EventEmitter by calling next. Writing this.loading.next(true) means, emit a
+true event on the loading EventEmitter. When we listen to the loading event on this component,
+the $event value will now be true (we’ll look more closely at using $event below).
+1 .map((query: string) => this.youtube.search(query))
+2 .switch()
+We use .map to call perform a search for each query that is emitted. By using switch we’re,
+essentially, saying “ignore all search events but the most recent”. That is, if a new search comes
+in, we want to use the most recent and discard the rest.
+
+### events, subscribe
+  subscribe takes three arguments: onSuccess, onError, onCompletion.
+47 .subscribe(
+48 (results: SearchResult[]) => { // on sucesss
+49 this.loading.next(false);
+50 this.results.next(results);
+51 },
+52 (err: any) => { // on error
+53 console.log(err);
+54 this.loading.next(false);
+55 },
+56 () => { // on completion
+57 this.loading.next(false);
+58 }
+59 );
+60 }
+
+## import Http Response RequestOptions Headers
+import { Component, OnInit } from '@angular/core';
+import {
+  Http,
+  Response,
+  RequestOptions,
+  Headers
+} from '@angular/http';
+
+## http, making a POST request.
+Making POST request with @angular/http is very much like making a GET request except that we
+have one additional parameter: a body.
+23 makePost(): void {
+24 this.loading = true;
+25 this.http.post(
+26 'http://jsonplaceholder.typicode.com/posts',
+27 JSON.stringify({
+28 body: 'bar',
+29 title: 'foo',
+30 userId: 1
+31 }))
+32 .subscribe((res: Response) => {
+33 this.data = res.json();
+34 this.loading = false;
+35 });
+36 }
+
+Notice in the second argument we’re taking an Object and converting it to a JSON string using
+JSON.stringify
+
+## http,  PUT/PATCH/DELETE/HEAD
+There are a few other fairly common HTTP requests and we call them in much the same way.
+• http.put and http.patch map to PUT and PATCH respectively and both take a URL and a body
+• http.delete and http.head map to DELETE and HEAD respectively and both take a URL (no body)
+38 makeDelete(): void {
+39 this.loading = true;
+40 this.http.delete('http://jsonplaceholder.typicode.com/posts/1')
+41 .subscribe((res: Response) => {
+42 this.data = res.json();
+43 this.loading = false;
+44 });
+45 }
+
+## RequestOptions
+All of the http methods we’ve covered so far also take an optional last argument: RequestOptions.
+The RequestOptions object encapsulates:
+• method
+• headers
+• body
+• mode
+• credentials
+• cache
+• url
+• search
+47 makeHeaders(): void {
+48 const headers: Headers = new Headers();
+49 headers.append('X-API-TOKEN', 'ng-book');
+50
+51 const opts: RequestOptions = new RequestOptions();
+52 opts.headers = headers;
+53
+54 this.http.get('http://jsonplaceholder.typicode.com/posts/1', opts)
+55 .subscribe((res: Response) => {
+56 this.data = res.json();
+57 });
+58 }
+
+# Routing
+
+
