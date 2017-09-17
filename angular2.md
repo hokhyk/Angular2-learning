@@ -763,5 +763,27 @@ The RequestOptions object encapsulates:
 58 }
 
 # Routing
+In web development, routing means splitting the application into different areas usually based on
+rules that are derived from the current URL in the browser.
+## the html5 client-side routing
+There’s two things you need to be aware of when using HTML5 mode routing, though
+1. Not all browsers support HTML5 mode routing, so if you need to support older
+browsers you might be stuck with hash-based routing for a while.
+2. The server has to support HTML5 based routing.
 
+using the history.pushState method that exposes the browser’s navigational history to JavaScript.
+So now, instead of relying on the anchor hack to navigate routes, modern frameworks can rely on
+pushState to perform history manipulation without reloads.
+In Angular we configure routes by mapping paths to the component that will handle them.
+
+## 3 main components of Angular routing
+• Routes describes the routes our application supports
+• RouterOutlet is a “placeholder” component that shows Angular where to put the content of each route
+• RouterLink directive is used to link to routes
+
+## imports
+5 import {
+6 RouterModule,
+7 Routes
+8 } from '@angular/router';
 
