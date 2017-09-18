@@ -873,4 +873,34 @@ We are are able to use the router-outlet directive in our template because we im
 
 ## RouterLink using [routerLink]
 see above routes' link code in the template.
+5 <a [routerLink]="['/home']">Home</a>
+6 <a [routerLink]="['/about']">About Us</a>
+7 <a [routerLink]="['/contact']">Contact Us</a>
+the value of routerLink is a string with an array containing a string "['home']", for example.there are more things you can provide when linking to routes.
 
+## --base-href  <base href="/">    provide: APP_BASE_HREF, useValue: '/'
+This line declares the base HTML tag. This tag is traditionally used to tell the browser where to look
+for images and other resources declared using relative paths.
+It turns out Angular Router also relies on this tag to determine how to construct its routing
+information.
+For instance, if we have a route with a path of /hello and our base element declares href="/app",
+the application will use /app/# as the concrete path.
+
+You can declare the application base path
+programmatically, when configuring our NgModule by using the APP_BASE_HREF provider:
+
+1 @NgModule({
+2 declarations: [ RoutesDemoApp ],
+3 imports: [
+4 BrowserModule,
+5 RouterModule.forRoot(routes) // <-- routes
+6 ],
+7 bootstrap: [ RoutesDemoApp ],
+8 providers: [
+9 { provide: LocationStrategy, useClass: HashLocationStrategy },
+10 { provide: APP_BASE_HREF, useValue: '/' } // <--- this right here
+11 ]
+12 })
+Putting { provide: APP_BASE_HREF, useValue: '/' } in the providers is the equivalent of using
+<base href="/"> on our application HTML header.
+When deploying to production we can also set the value of the base-href by using the --base-href command-line option.
