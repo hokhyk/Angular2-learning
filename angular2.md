@@ -787,3 +787,90 @@ In Angular we configure routes by mapping paths to the component that will handl
 7 Routes
 8 } from '@angular/router';
 
+## app.modules.ts:  routes configuration
+const routes: Routes = [
+  // basic routes
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'home', component: HomeComponent },
+  { path: 'about', component: AboutComponent },
+  { path: 'contact', component: ContactComponent },
+  { path: 'contactus', redirectTo: 'contact' },
+
+  // authentication demo
+  { path: 'login', component: LoginComponent },
+  {
+    path: 'protected',
+    component: ProtectedComponent,
+    canActivate: [ LoggedInGuard ]
+  },
+
+  // nested
+  {
+    path: 'products',
+    component: ProductsComponent,
+    children: childRoutes
+  }
+];
+
+• path specifies the URL this route will handle
+• component is what ties a given route path to a component that will handle the route
+• the optional redirectTo is used to redirect a given path to an existing route
+As a summary, the goal of routes is to specify which component will handle a given path.
+
+## installing our routes
+ To use the routes in our app we do two things to our NgModule:
+1. Import the RouterModule
+2. Install the routes using RouterModule.forRoot(routes) in the imports of our NgModule
+@NgModule({
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    ContactComponent,
+    AboutComponent,
+    LoginComponent,
+    ProtectedComponent,
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    HttpModule,
+    RouterModule.forRoot(routes), // <-- routes
+
+    // added this for our child module
+    ProductsModule
+  ],
+  providers: [
+    // uncomment this for "hash-bang" routing
+    // { provide: LocationStrategy, useClass: HashLocationStrategy }
+    AUTH_PROVIDERS,
+    LoggedInGuard
+  ],
+  bootstrap: [AppComponent]
+})
+
+##  RouterOutlet using <router-outlet>
+We are are able to use the router-outlet directive in our template because we imported the RouterModule in our NgModule.
+1 <div class="page-header">
+2 <div class="container">
+3 <h1>Router Sample</h1>
+4 <div class="navLinks">
+5 <a [routerLink]="['/home']">Home</a>
+6 <a [routerLink]="['/about']">About Us</a>
+7 <a [routerLink]="['/contact']">Contact Us</a>
+8 |
+9 <a [routerLink]="['/products']">Products</a>
+10 <a [routerLink]="['/login']">Login</a>
+11 <a [routerLink]="['/protected']">Protected</a>
+12 </div>
+13 </div>
+14 </div>
+15
+16 <div id="content">
+17 <div class="container">
+18 <router-outlet></router-outlet>
+19 </div>
+20 </div>
+
+## RouterLink using [routerLink]
+see above routes' link code in the template.
+
