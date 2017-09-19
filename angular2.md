@@ -971,4 +971,66 @@ this input within our template code by using newquery.value.
 27 </a>
 28 </h3>
 
+### accepts the input and do the search and render  the search results:
+22 export class SearchComponent implements OnInit {
+23 query: string;
+24 results: Object;
+25
+26 constructor(private spotify: SpotifyService,
+27 private router: Router,
+28 private route: ActivatedRoute) {
+29 this.route
+30 .queryParams
+31 .subscribe(params => { this.query = params['query'] || ''; });
+32 }
+On the constructor we’re injecting the SpotifyService (that we created above), Router, and the
+ActivatedRoute and making them properties of our class.
+In our constructor we subscribe to the queryParams property - this lets us access query parameters,
+such as the search term (params['query']).
+In a URL like: http://localhost/#/search?query=cats&order=ascending, queryParams gives us
+the parameters in an object. This means we could access the order with params['order'] (in this
+case, ascending).
+
+#### the search method
+In our SearchComponent we will call out to the SpotifyService and render the results. There are
+two cases when we want to run a search:
+We want to run a search when the user:
+• enters a search query and submits the form
+• navigates to this page with a given URL in the query parameters (e.g. someone shared a link
+or bookmarked the page)
+43 search(): void {
+44 console.log('this.query', this.query);
+45 if (!this.query) {
+46 return;
+47 }
+48
+49 this.spotify
+50 .searchTrack(this.query)
+51 .subscribe((res: any) => this.renderResults(res));
+52 }
+
+54 renderResults(res: any): void {
+55 this.results = null;
+56 if (res && res.tracks && res.tracks.items) {
+57 this.results = res.tracks.items;
+58 }
+59 }
+
+### searching on page load
+34 ngOnInit(): void {
+35 this.search();
+36 }
+
+### submit the searching
+38 submit(query: string): void {
+39 this.router.navigate(['search'], { queryParams: { query: query } })
+40 .then(_ => this.search() );
+41 }
+
+We’re manually telling the router to navigate to the search route, and providing a query parameter,
+then performing the actual search.
+Doing things this way gives us a great benefit: if we reload the browser, we’re going to see the same
+search result rendered. We can say that we’re persisting the search term on the URL.
+
+## track component
 
