@@ -935,6 +935,40 @@ Notice that route.params is an observable. We can extract the value of the param
 by using .subscribe. In this case, we assign the value of params['id'] to the id instance variable
 on the component.
 
+#### service example
+1 class SpotifyService {
+2 constructor(public http: Http) {
+3 }
+4 5
+searchTrack(query: string) {
+6 let params: string = [
+7 `q=${query}`,
+8 `type=track`
+9 ].join("&");
+10 let queryURL: string = `https://api.spotify.com/v1/search?${params}`;
+11 return this.http.request(queryURL).map(res => res.json());
+12 }
+13 }
 
+#### input label accepting inputs example
+1 <h1>Search</h1>
+2 3
+<p>
+4 <input type="text" #newquery
+5 [value]="query"
+6 (keydown.enter)="submit(newquery.value)">
+7 <button (click)="submit(newquery.value)">Search</button>
+8 </p>
+Here we have the input field and we’re binding its DOM element value property the query property
+of our component.
+We also give this element a template variable named #newquery. We can now access the value of
+this input within our template code by using newquery.value.
+
+### RouterLink directive with route parameters for a given route
+24 <h3>
+25 <a [routerLink]="['/artists', t.artists[0].id]">
+26 {{ t.artists[0].name }}
+27 </a>
+28 </h3>
 
 
