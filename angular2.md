@@ -904,3 +904,37 @@ programmatically, when configuring our NgModule by using the APP_BASE_HREF provi
 Putting { provide: APP_BASE_HREF, useValue: '/' } in the providers is the equivalent of using
 <base href="/"> on our application HTML header.
 When deploying to production we can also set the value of the base-href by using the --base-href command-line option.
+
+## routing strategies  PathLocationStrategy HashLocationStrategy
+The way the Angular application parses and creates paths from and to route definitions is called location strategy.
+The default strategy is PathLocationStrategy, which is what we call HTML5 routing.
+While using this strategy, routes are represented by regular paths, like /home or /contact.
+Instead of using the default PathLocationStrategy we can also use the HashLocationStrategy.
+The reason we’re using the hash strategy as a default is because if we were using HTML5 routing,
+our URLs would end up being regular paths (that is, not using hash/anchor tags).
+
+## route parameters
+We can specify that a route takes a parameter by putting a colon : in front of the path segment like this:
+/route/:param
+###  using route parameters    ActivateRoute
+1 import { ActivatedRoute } from '@angular/router';
+Next, we inject the ActivatedRoute into the constructor of our component. 
+1 const routes: Routes = [
+2 { path: 'product/:id', component: ProductComponent }
+3 ];
+Then when we write the ProductComponent, we add the ActivatedRoute as one of the constructor
+arguments:
+1 export class ProductComponent {
+2 id: string;
+3 4
+constructor(private route: ActivatedRoute) {
+5 route.params.subscribe(params => { this.id = params['id']; });
+6 }
+7 }
+Notice that route.params is an observable. We can extract the value of the param into a hard value
+by using .subscribe. In this case, we assign the value of params['id'] to the id instance variable
+on the component.
+
+
+
+
