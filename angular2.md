@@ -1032,5 +1032,5 @@ then performing the actual search.
 Doing things this way gives us a great benefit: if we reload the browser, we’re going to see the same
 search result rendered. We can say that we’re persisting the search term on the URL.
 
-## track component
+## track component  （page 251)
 
