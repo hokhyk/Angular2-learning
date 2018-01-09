@@ -1,0 +1,30 @@
+.DS_Store
+._.DS_Store
+WebStorm*
+ng-book-code-sample/.gitignore
+ ng-book-code-sample/.idea/
+ng-book-code-sample/README.md
+ng-book-code-sample/advanced-components/
+ng-book-code-sample/built-in-directives/
+ng-book-code-sample/dependency-injection/
+ng-book-code-sample/first-app/
+ng-book-code-sample/forms/
+ng-book-code-sample/how-angular-works/
+ng-book-code-sample/http/
+ng-book-code-sample/index.json
+ng-book-code-sample/nativescript/
+ng-book-code-sample/node_modules/
+ng-book-code-sample/redux/
+ng-book-code-sample/rxjs/
+ng-book-code-sample/typescript/
+ng-book-code-sample/upgrade/
+node*
+._ng-book.2.Angular.4.r58.2017.3.pdf
+.gitignore.swp
+.smbdeleteAAAec0eb8
+ng-book-code-sample/.idea/
+ng-book.2.Angular.4.r58.2017.3.pdf
+Angular training guide.pdf
+Typescript video training.zip
+jquery++ 2nd edition.pdf
+
