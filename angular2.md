@@ -1037,3 +1037,15 @@ search result rendered. We can say that we’re persisting the search term on th
 
 # ionic3 lazyload  
 https://www.jianshu.com/p/2c95e0fa4cc6 
+
+# ionic3 page hooks page lifecycle events ionic document: navController的API部分
+https://www.jianshu.com/p/72b704b5c9ed
+ionViewDidLoad 第一次调用 返回void
+ionViewWillEnter 每次调用 返回void
+ionViewDidEnter 每次调用 返回void
+ionViewWillLeave 每次调用 返回void
+ionViewDidLeave 每次调用 返回void
+ionViewWillUnload 每次调用 返回void
+ionViewCanEnter 每次调用 返回boolean
+ionViewCanLeave 每次调用 返回boolean
+
