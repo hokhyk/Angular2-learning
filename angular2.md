@@ -1035,4 +1035,5 @@ search result rendered. We can say that we’re persisting the search term on th
 ## track component  （page 251)
 
 
-
+# ionic3 lazyload  
+https://www.jianshu.com/p/2c95e0fa4cc6 
