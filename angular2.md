@@ -1050,8 +1050,20 @@ ionViewCanEnter 每次调用 返回boolean
 ionViewCanLeave 每次调用 返回boolean
 
 # start a new ionic3 project
+install nvm: curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+(https://github.com/creationix/nvm#install-script)
+nvm install node
+nvm use node
+nvm list
+
+//install n: curl -L https://git.io/n-install | bash
+//install node: $ n stable
+//install npm: $ curl -0 -L https://npmjs.com/install.sh | sudo sh
+upgrade npm: npm install -g npm
+install cnpm: npm install -g cnpm --registry=https://registry.npm.taobao.org
 npm install -g ionic cordova
-npm uninstall -g ionic npm cache clean
+npm uninstall -g ionic
+npm cache clean
 
 ionic start campermate blank --v2
 cd campermate
@@ -1067,4 +1079,6 @@ ionic g provider Connectivity
 
 往App Module里面添加页面与服务:
 
+
+# https://oauth.net/2/   
 
