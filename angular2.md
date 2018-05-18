@@ -1049,3 +1049,22 @@ ionViewWillUnload 每次调用 返回void
 ionViewCanEnter 每次调用 返回boolean
 ionViewCanLeave 每次调用 返回boolean
 
+# start a new ionic3 project
+npm install -g ionic cordova
+npm uninstall -g ionic npm cache clean
+
+ionic start campermate blank --v2
+cd campermate
+ionic serve -l
+
+ionic g page Location
+ionic g page MyDetails
+ionic g page CampDetails
+
+ionic g provider Data
+ionic g provider GoogleMaps
+ionic g provider Connectivity
+
+往App Module里面添加页面与服务:
+
+
