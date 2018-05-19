@@ -1080,5 +1080,9 @@ ionic g provider Connectivity
 往App Module里面添加页面与服务:
 
 
-# https://oauth.net/2/   
+# https://oauth.net/2/     oauth2
+# cordova-plugin-whitelist 协议白名单配置整理 
+  https://blog.csdn.net/u011127019/article/details/56009248 
+  http://cordova.apache.org/docs/en/latest/reference/cordova-plugin-whitelist/
+  http://cordova.apache.org/docs/en/latest/reference/cordova-plugin-inappbrowser/
 
