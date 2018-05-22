@@ -1079,6 +1079,14 @@ ionic g provider Connectivity
 
 往App Module里面添加页面与服务:
 
+# pouchdb 
+npm install pouchdb --save
+我们也要给PouchDB安装“typings”这样TypeScript编译器就不会抱怨了（ 因为他不知道PouchDB是什么） 。
+> 运行如下命令按钮PouchDB的types
+npm install @types/pouchdb --save --save-exact
+
+ionic cordova plugin add cordova-plugin-geolocation --variable GEOLOCATION_USAGE_DESCRIPTION="To locate you"
+npm install --save @ionic-native/geolocation
 
 # https://oauth.net/2/     oauth2
 # cordova-plugin-whitelist 协议白名单配置整理 
