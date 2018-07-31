@@ -1090,59 +1090,89 @@ ionic cordova plugin add cordova-plugin-geolocation --variable GEOLOCATION_USAGE
 npm install --save @ionic-native/geolocation
 
 # Ionic打包  ionic resources
-设计图标 :Ionic资源工具之要求一个 192x192 的图标作为基本，但是由于应用商店需求一个大一些的图
-标，因此最好先设计为 1024x1024（ 甚至是 2048x2048） 。在大部分时候，将大图缩小比较
-好，特殊情况下你可以特殊设计小号图标。
-> 创建一个 192x192 的图标名为 icon.png 将他保存到 resource 文件夹内（ 覆盖已有的图
+设计图标 :Ionic资源工具之要求一个 192x192 的图标作为基本，但是由于应用商店需求一个大一些的图
+
+标，因此最好先设计为 1024x1024（ 甚至是 2048x2048） 。在大部分时候，将大图缩小比较
+
+好，特殊情况下你可以特殊设计小号图标。
+
+> 创建一个 192x192 的图标名为 icon.png 将他保存到 resource 文件夹内（ 覆盖已有的图
+
 标）
 
-设计闪屏: 如果你
-将闪屏设计为 2208x2208 那么所有的闪屏都可以很好的生成。尽量将重要部分设计为靠近图片的中心部分，靠近边缘的是稍微不那么重要
+设计闪屏: 如果你
+
+将闪屏设计为 2208x2208 那么所有的闪屏都可以很好的生成。尽量将重要部分设计为靠近图片的中心部分，靠近边缘的是稍微不那么重要
+
 的东西（ 即，背景图片部分） 。制作自己的 2208x2208 闪屏然后存放到resources文件夹命名为 splash.png.
-现在制作好了基本图标和闪屏，可以通过如下命令生成其他的图标和闪屏：
+现在制作好了基本图标和闪屏，可以通过如下命令生成其他的图标和闪屏：
+
 ionic resources
 
 设置Bundler ID和App Name:  在进行构建之前有一个重要的步骤是修改config.xml文件里的App Name和Bundle ID。
-<?xml version='1.0' encoding='utf-8'?>
-<widget id="io.ionic.starter" version="0.0.1"
-xmlns="http://www.w3.org/ns/widgets"
-xmlns:cdv="http://cordova.apache.org/ns/1.0">
-<name>V2 Test</name>
-<description>An Ionic Framework and Cordova project.</description>
-<author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Te
+<?xml version='1.0' encoding='utf-8'?>
+
+<widget id="io.ionic.starter" version="0.0.1"
+
+xmlns="http://www.w3.org/ns/widgets"
+
+xmlns:cdv="http://cordova.apache.org/ns/1.0">
+
+<name>V2 Test</name>
+
+<description>An Ionic Framework and Cordova project.</description>
+
+<author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Te
+
 am</author>
 
 id也就是现在的io.ionic.starter。这个值应该匹配签名的值，应该被设置为类似：com.yourname.project。
 
 设置Cordova偏好:
-<preference name="webviewbounce" value="false" />
-<preference name="UIWebViewBounce" value="false" />
-<preference name="DisallowOverscroll" value="true" />
-<preference name="android-minSdkVersion" value="16" />
+<preference name="webviewbounce" value="false" />
+
+<preference name="UIWebViewBounce" value="false" />
+
+<preference name="DisallowOverscroll" value="true" />
+
+<preference name="android-minSdkVersion" value="16" />
+
 <preference name="BackupWebStorage" value="none" />
 
 缩减素材: tinyPNG
 
 生成android keystore:
-android Android需要你创建一个‘keystore’来对应用进行签名。给应用签名需要一个Android SDK自带的工具叫做keytool。如果你的电脑上没有按组航
+android Android需要你创建一个‘keystore’来对应
+用进行签名。给应用签名需要一个Android SDK自带的工具叫做keytool。如果你的电脑上没有按组航
+
 Android SDK的话，请参考这个指引：http://ionicframework.com/docs/v1/ionic-cli-faq/#android-sdk
-设置好Android SDK之后，可以按照如下步骤创建一个keystore文件。
-运行如下命令生成一个指定别名alias_name（ 你应该改一下） 的keystore文件
-keytool -genkey -v -keystore my-release-key.keystore -alias alias_name -keyalg RSA
+设置好Android SDK之后，可以按照如下步骤创建一个keystore文件。
+
+运行如下命令生成一个指定别名alias_name（ 你应该改一下） 的keystore文件
+
+keytool -genkey -v -keystore my-release-key.keystore -alias alias_name -keyalg RSA
+
 -keysize 2048 -validity 10000
-输入这个命令的时候会提醒你输入密码 -- 输入个密码存好并记住。为了后面能在应用商店更新你的应用你需要这个keystore文件，以及别名和密码。如果你忘记了其中一个的话，就更新不了。
+输入这个命令的时候会提醒你输入密码 -- 输入个密码存好并记住。为了后面能在应用商店更新你的应用你需要这个keystore文件，以及别名和密码。
+如果你忘记了其中一个的话，就更新不了。
 
 生成一个Key Hash:
-keytool -exportcert -alias alias_name -keystore my-release-key.keystore | openssl sha1 -binary | openssl base64
-确保用你的keystore别名替换alias_name和用你的keystore文件路径替换my-releasekey.keystore。
+keytool -exportcert -alias alias_name -keystore my-release-key.keystore | openssl sha1
+ -binary | openssl base64
+确保用你的keystore别名替换alias_name和用你的keystore文件路径替换my-releasekey.keystore。
+
 一旦完成的话会在终端输出你的Key Hash，然后你就可以简单复制到你的Facebook应用的Android platform setting去。
 
-创建文件 platforms/android/release-signing.properties 文件，添加如下内容：
-storeFile=snapaday-release.keystore
-keyAlias=snapaday
+创建文件 platforms/android/release-signing.properties 文件，添加如下内容：
 
+storeFile=snapaday-release.keystore
+
+keyAlias=snapaday
+                        nyhuiredw2q` 1OP]CAYJUTHIGKFR'DSW
+                        HJM`
 ionic build android --release
-这个命令会给你生成.apk文件,位置在：platforms/android/build/outputs/apk/ .
+这个命令会给你生成.apk文件,位置
+在：platforms/android/build/outputs/apk/ .
 
 android本地环境搭建：
 1、安装JAVA，OPENJDK1.8
